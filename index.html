@@ -2,208 +2,159 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CONTROL PANEL</title>
-
+<title>JK</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-:root {
-    --bg: #0f1220;
-    --panel: #1a1f3a;
-    --accent: #6df2c2;
-    --text: #e9ecff;
-    --muted: #9aa1ff;
-}
-
-* {
-    box-sizing: border-box;
-}
-
 html, body {
-    margin: 0;
-    height: 100%;
-    background: linear-gradient(135deg, #0f1220, #141a33);
-    font-family: Inter, system-ui, sans-serif;
-    color: var(--text);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: black;
 }
-
-.container {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.panel {
-    width: 460px;
-    padding: 32px;
-    background: var(--panel);
-    border-radius: 16px;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.45);
-    animation: panelIn 0.8s ease;
-}
-
-@keyframes panelIn {
-    from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.96);
-    }
-    to {
-        opacity: 1;
-        transform: none;
-    }
-}
-
-h1 {
-    margin: 0;
-    font-size: 22px;
-    letter-spacing: 2px;
-}
-
-.status {
-    margin-top: 6px;
-    font-size: 13px;
-    color: var(--muted);
-}
-
-.divider {
-    height: 1px;
-    background: rgba(255,255,255,0.08);
-    margin: 20px 0;
-}
-
-input {
-    width: 100%;
-    padding: 14px;
-    border-radius: 10px;
-    border: none;
-    outline: none;
-    background: #0e132b;
-    color: var(--text);
-    font-size: 15px;
-}
-
-button {
-    width: 100%;
-    margin-top: 12px;
-    padding: 14px;
-    border-radius: 10px;
-    border: none;
-    background: var(--accent);
-    color: #08130e;
-    font-weight: 600;
-    font-size: 15px;
-    cursor: pointer;
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-
-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(109,242,194,0.4);
-}
-
-.log {
-    margin-top: 22px;
-    font-size: 14px;
-    line-height: 1.5;
-    min-height: 120px;
-    animation: fadeIn 0.4s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.hint {
-    margin-top: 16px;
-    font-size: 12px;
-    color: var(--muted);
-    opacity: 0.7;
+canvas {
+  display: block;
 }
 </style>
 </head>
-
 <body>
-
-<div class="container">
-    <div class="panel">
-        <h1>ACCESS TERMINAL</h1>
-        <div class="status" id="status">authentication stage 1</div>
-
-        <div class="divider"></div>
-
-        <input id="input" placeholder="enter key">
-        <button onclick="submitKey()">continue</button>
-
-        <div class="log" id="log">
-            system online.<br>
-            four layers detected.<br>
-            sequential verification required.
-        </div>
-
-        <div class="hint" id="hint">
-            note: first keys are usually simple.
-        </div>
-    </div>
-</div>
+<canvas id="c"></canvas>
 
 <script>
-let stage = 0;
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
 
-function submitKey() {
-    const val = document.getElementById("input").value.trim();
-    const log = document.getElementById("log");
-    const status = document.getElementById("status");
-    const hint = document.getElementById("hint");
-
-    if (stage === 0) {
-        if (val === "1234") {
-            stage = 1;
-            status.textContent = "authentication stage 2";
-            log.innerHTML =
-                "stage 1 accepted.<br>" +
-                "pattern confirmed.<br>" +
-                "deriving next sequence...";
-            hint.textContent =
-                "hint: use the same numbers, just not in the same way.";
-        } else {
-            log.innerHTML =
-                "key rejected.<br>" +
-                "expected a basic sequence.";
-        }
-    }
-
-    else if (stage === 1) {
-        if (val === "4321") {
-            stage = 2;
-            status.textContent = "final validation";
-            log.innerHTML =
-                "stage 2 accepted.<br>" +
-                "admin channel located.<br>" +
-                "preparing credentials...";
-            hint.textContent =
-                "almost there.";
-        } else {
-            log.innerHTML =
-                "close.<br>" +
-                "same digits, different order.";
-        }
-    }
-
-    else {
-        status.textContent = "result";
-        log.innerHTML =
-            "credentials generated.<br><br>" +
-            "<strong>just kidding.</strong><br><br>" +
-            "there is no admin code.<br>" +
-            "you solved the puzzle.<br>" +
-            "that was the whole thing.<br><br>" +
-            "you got trolled.";
-        hint.textContent = "";
-    }
-
-    document.getElementById("input").value = "";
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 }
-</script>
+resize();
+window.addEventListener("resize", () => {
+  resize();
+  createTextParticles();
+});
 
+const text = "JK YOU'RE NOT GETTING IT";
+let fontSize;
+const gap = 5;
+let particles = [];
+let trails = [];
+let time = 0;
+
+const mouse = {
+  x: -9999,
+  y: -9999,
+  vx: 0,
+  vy: 0
+};
+
+canvas.addEventListener("mousemove", e => {
+  mouse.vx = e.clientX - mouse.x;
+  mouse.vy = e.clientY - mouse.y;
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+
+  trails.push({ x: mouse.x, y: mouse.y, life: 1 });
+});
+
+canvas.addEventListener("mouseleave", () => {
+  mouse.x = mouse.y = -9999;
+});
+
+function createTextParticles() {
+  particles = [];
+  fontSize = Math.min(canvas.width / 9, 130);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "white";
+  ctx.font = `900 ${fontSize}px Arial`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+  for (let y = 0; y < canvas.height; y += gap) {
+    for (let x = 0; x < canvas.width; x += gap) {
+      if (img[(y * canvas.width + x) * 4 + 3] > 150) {
+        particles.push({
+          x, y,
+          ox: x, oy: y,
+          vx: 0, vy: 0,
+          seed: Math.random() * 1000
+        });
+      }
+    }
+  }
+}
+createTextParticles();
+
+function animate() {
+  time += 0.01;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // glow
+  ctx.shadowBlur = 15;
+  ctx.shadowColor = "white";
+
+  // mouse trails
+  for (let i = trails.length - 1; i >= 0; i--) {
+    const t = trails[i];
+    t.life -= 0.05;
+    if (t.life <= 0) {
+      trails.splice(i, 1);
+      continue;
+    }
+    ctx.fillStyle = `rgba(255,255,255,${t.life})`;
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, 6 * t.life, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.fillStyle = "white";
+
+  for (const p of particles) {
+    // idle breathing
+    const breathe = Math.sin(time + p.seed) * 0.3;
+    p.ox += breathe * 0.05;
+    p.oy += breathe * 0.05;
+
+    const dx = p.x - mouse.x;
+    const dy = p.y - mouse.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const radius = 120;
+
+    if (dist < radius) {
+      const force = (radius - dist) / radius;
+      const angle = Math.atan2(dy, dx);
+      const impact = Math.min(Math.sqrt(mouse.vx ** 2 + mouse.vy ** 2), 20);
+
+      p.vx += Math.cos(angle) * force * impact * 0.6;
+      p.vy += Math.sin(angle) * force * impact * 0.6;
+    }
+
+    // spring back
+    p.vx += (p.ox - p.x) * 0.015;
+    p.vy += (p.oy - p.y) * 0.015;
+
+    // noise wobble
+    p.vx += Math.sin(time + p.seed) * 0.02;
+    p.vy += Math.cos(time + p.seed) * 0.02;
+
+    p.vx *= 0.88;
+    p.vy *= 0.88;
+
+    p.x += p.vx;
+    p.y += p.vy;
+
+    ctx.fillRect(p.x, p.y, 2, 2);
+  }
+
+  ctx.shadowBlur = 0;
+  requestAnimationFrame(animate);
+}
+
+animate();
+</script>
 </body>
 </html>
