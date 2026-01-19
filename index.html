@@ -134,7 +134,6 @@ function animate() {
   ctx.fillStyle = "white";
 
   const speed = Math.hypot(mouse.vx, mouse.vy);
-  const glitch = speed > 30;
 
   for (const p of particles) {
     // breathing
@@ -177,14 +176,6 @@ function animate() {
 
     p.x += p.vx;
     p.y += p.vy;
-
-    if (glitch) {
-      ctx.fillStyle = "red";
-      ctx.fillRect(p.x + 2, p.y, 2, 2);
-      ctx.fillStyle = "cyan";
-      ctx.fillRect(p.x - 2, p.y, 2, 2);
-      ctx.fillStyle = "white";
-    }
 
     ctx.fillRect(p.x, p.y, 2, 2);
   }
